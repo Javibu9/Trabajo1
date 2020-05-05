@@ -23,6 +23,7 @@ public class MainActivity extends AppCompatActivity {
     private EditText EditTextEmail;
     private EditText EditTextContraseña;
     private Button ButtonLogin;
+    private Button ButtonRegistrer;
     private Switch remember;
     private String email="";
     private String contraseña="";
@@ -35,6 +36,14 @@ public class MainActivity extends AppCompatActivity {
         preferences = getSharedPreferences("Preferences", Context.MODE_PRIVATE);
         Autorizacion= FirebaseAuth.getInstance();
 
+        ButtonRegistrer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, RegisterActivity.class);
+                startActivity(intent);
+
+            }
+        });
 
         ButtonLogin.setOnClickListener(new View.OnClickListener(){
             @Override
@@ -71,13 +80,15 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
     private void bindUI() {
+
         remember= (Switch) findViewById(R.id.remember);
         EditTextEmail = (EditText) findViewById(R.id.editTextEmail);
         EditTextContraseña = (EditText) findViewById(R.id.editTextPassword);
         ButtonLogin = (Button) findViewById(R.id.btnLogin);
+        ButtonRegistrer = (Button) findViewById(R.id.btnRegistrar);
     }
 
-    private void loginUser(){
+    private boolean loginUser(){
         Autorizacion.signInWithEmailAndPassword(email, contraseña).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
@@ -92,5 +103,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+        return false;
     }
 }
