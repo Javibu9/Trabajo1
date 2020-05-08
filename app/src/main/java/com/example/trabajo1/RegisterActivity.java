@@ -101,6 +101,7 @@ public class RegisterActivity extends AppCompatActivity {
                         public void onComplete(@NonNull Task<Void> task2) {
                             if (task2.isSuccessful()) {
                                 startActivity(new Intent(RegisterActivity.this, MainActivity.class));
+                                Toast.makeText(RegisterActivity.this, "Inicia sesion para continuar", Toast.LENGTH_SHORT).show();
                                 finish();
 
                             } else {

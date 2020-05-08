@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -24,6 +25,7 @@ public class MainActivity extends AppCompatActivity {
     private EditText EditTextContraseña;
     private Button ButtonLogin;
     private Button ButtonRegistrer;
+    private Button ButtonRecuperar;
     private Switch remember;
     private String email="";
     private String contraseña="";
@@ -33,7 +35,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         bindUI();
+        //guardar ultima sesion
         preferences = getSharedPreferences("Preferences", Context.MODE_PRIVATE);
+        setCredentialsIfExist();
+
         Autorizacion= FirebaseAuth.getInstance();
 
         ButtonRegistrer.setOnClickListener(new View.OnClickListener() {
@@ -51,22 +56,29 @@ public class MainActivity extends AppCompatActivity {
                 email= EditTextEmail.getText().toString();
                 contraseña= EditTextContraseña.getText().toString();
                 //si los campos email y contraseña no estan vacios el usuario se logea
-                if (loginUser()){
-                    AdvanceActivity();
-                    saveOnPreferences(email, contraseña);
-                }
                 if (!email.isEmpty() && !contraseña.isEmpty()){
-                    loginUser();
-                }
-                //si los campos email y contraseña estan vacios escribe el siguiente mensaje
+                    if (loginUser()){
+                        //AdvanceActivity();
+                        saveOnPreferences(email, contraseña);
+                    }
+                }//si los campos email y contraseña estan vacios escribe el siguiente mensaje
                 else {
                     Toast.makeText(MainActivity.this, "Complete los campos", Toast.LENGTH_SHORT).show();
                 }
             }
 
         });
+        ButtonRecuperar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, RecuperarContrasena.class);
+                startActivity(intent);
+            }
+        });
+
     }
     private void saveOnPreferences(String email, String contraseña) {
+        //si en el switch elige guardar lo guarda
         if (remember.isChecked()) {
             SharedPreferences.Editor editor = preferences.edit();
             editor.putString("email", email);
@@ -74,11 +86,11 @@ public class MainActivity extends AppCompatActivity {
             editor.apply();
         }
     }
-    private void AdvanceActivity() {
+    /*private void AdvanceActivity() {
         Intent intent = new Intent(this, SecondActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
-    }
+    }*/
     private void bindUI() {
 
         remember= (Switch) findViewById(R.id.remember);
@@ -86,7 +98,17 @@ public class MainActivity extends AppCompatActivity {
         EditTextContraseña = (EditText) findViewById(R.id.editTextPassword);
         ButtonLogin = (Button) findViewById(R.id.btnLogin);
         ButtonRegistrer = (Button) findViewById(R.id.btnRegistrar);
+        ButtonRecuperar = (Button) findViewById(R.id.btnRecuperar);
     }
+    private void setCredentialsIfExist(){
+        String email = Util.getUserMailPrefs(preferences);
+        String password = Util.getUserPassPrefs(preferences);
+        if (!TextUtils.isEmpty(email) && !TextUtils.isEmpty(password)) {
+            EditTextEmail.setText(email);
+            EditTextContraseña.setText(password);
+        }
+    }
+
 
     private boolean loginUser(){
         Autorizacion.signInWithEmailAndPassword(email, contraseña).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
@@ -94,8 +116,9 @@ public class MainActivity extends AppCompatActivity {
             public void onComplete(@NonNull Task<AuthResult> task) {
                 //metodo para logearse
                 if (task.isSuccessful()){
-                    startActivity(new Intent(MainActivity.this, SecondActivity.class));
-                    finish();
+                    Intent intent = new Intent(MainActivity.this, SecondActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
                 }
                 //si al logearse los datos son incorrectos se escribira el siguiente mensaje
                 else{
